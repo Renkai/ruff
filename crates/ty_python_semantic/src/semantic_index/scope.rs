@@ -15,6 +15,7 @@ use crate::{
 
 /// A cross-module identifier of a scope that can be used as a salsa query parameter.
 #[salsa::tracked(debug, heap_size=ruff_memory_usage::heap_size)]
+#[derive(PartialOrd, Ord)]
 pub struct ScopeId<'db> {
     pub file: File,
 
@@ -25,10 +26,6 @@ pub struct ScopeId<'db> {
 impl get_size2::GetSize for ScopeId<'_> {}
 
 impl<'db> ScopeId<'db> {
-    pub(crate) fn is_function_like(self, db: &'db dyn Db) -> bool {
-        self.node(db).scope_kind().is_function_like()
-    }
-
     pub(crate) fn is_annotation(self, db: &'db dyn Db) -> bool {
         self.node(db).scope_kind().is_annotation()
     }
@@ -194,6 +191,10 @@ pub(crate) enum ScopeLaziness {
 impl ScopeLaziness {
     pub(crate) const fn is_eager(self) -> bool {
         matches!(self, ScopeLaziness::Eager)
+    }
+
+    pub(crate) const fn is_lazy(self) -> bool {
+        matches!(self, ScopeLaziness::Lazy)
     }
 }
 
